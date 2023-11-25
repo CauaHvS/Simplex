@@ -50,12 +50,34 @@ class Simplex:
 
         return True if len(negativo) > 0 else False
     
+    def get_variables(self):
+        basic_variables = []
+        non_basic_variables = []
+
+        for i in range(1, len(self.table[0])-1):
+            column = [row[i] for row in self.table[1:]]
+            if column.count(0) == len(column) - 1 and column.count(1) == 1:
+                basic_variables.append(f"x{i}")
+            else:
+                non_basic_variables.append(f"x{i}")
+
+        return basic_variables, non_basic_variables
+
+    def print_variables(self):
+        basic_variables, non_basic_variables = self.get_variables()
+        print(f"Variáveis básicas: {', '.join(basic_variables)}")
+        print(f"Variáveis não básicas: {', '.join(non_basic_variables)}")
+    
     
     def print_table(self):
         for i in range(len(self.table)):
             for j in range(len(self.table[0])):
-                print(f"{self.table[i][j]}\t", end="")
+                if j == len(self.table[0]) - 1:
+                    print(f"{self.table[i][j]}\t", end="")
+                else:
+                    print(f"{self.table[i][j]}\t", end="")
             print()
+        self.print_variables()
     
     def recalcula(self):
         coluna_entrada = self.get_entra_colunas()
@@ -64,6 +86,23 @@ class Simplex:
         self.table[primeira_linha_saida] = linha_pivot
         table_copy = self.table.copy()
         index = 0
+        saida = []
+        for i in range(len(self.table)):
+            saida.append(self.table[i][-1])
+
+        print("Variáveis básicas:", end=" ")
+        for i in range(len(saida)):
+            if saida[i] != 0:
+                print(f"x{i+1}", end=" ")
+        print()
+
+        print("Variáveis não básicas:", end=" ")
+        for i in range(len(saida)):
+            if saida[i] == 0:
+                print(f"x{i+1}", end=" ")
+        print()
+
+        print("Z:", saida[-1])
         
         while index < len(self.table):
             if index != primeira_linha_saida:
@@ -71,6 +110,9 @@ class Simplex:
                 nova_linha = self.calcula_nova_linha(line, coluna_entrada, linha_pivot)
                 self.table[index] = nova_linha
             index += 1
+                
+        
+
 
     def resolve(self):
         self.recalcula()
